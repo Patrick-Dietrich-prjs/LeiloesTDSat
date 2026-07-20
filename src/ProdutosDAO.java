@@ -20,8 +20,7 @@ public class ProdutosDAO {
     
     Connection conn;
     PreparedStatement prep;
-    ResultSet resultset;
-    ArrayList<ProdutosDTO> listagem = new ArrayList<>();
+    ResultSet resultset;    
     
     public void cadastrarProduto (ProdutosDTO produto){        
         conn = new conectaDAO().connectDB();
@@ -54,6 +53,7 @@ public class ProdutosDAO {
     }
     
     public ArrayList<ProdutosDTO> listarProdutos(){
+        ArrayList<ProdutosDTO> listagem = new ArrayList<>();
         conn = new conectaDAO().connectDB();
         listagem.clear();
         
@@ -115,6 +115,41 @@ public class ProdutosDAO {
                 JOptionPane.showMessageDialog(null, "Erro ao fechar conexão: " + e.getMessage());
             }
         }
-    }    
+    }
+    
+    public ArrayList<ProdutosDTO> listarProdutosVendidos(){
+        ArrayList<ProdutosDTO> vendidos = new ArrayList<>();
+        conn = new conectaDAO().connectDB();
+
+        String sql = "SELECT * FROM produtos WHERE status = ?";
+
+        try {
+            prep = conn.prepareStatement(sql);
+            prep.setString(1, "Vendido");
+            resultset = prep.executeQuery();
+
+            while (resultset.next()) {
+                ProdutosDTO produto = new ProdutosDTO();
+
+                produto.setId(resultset.getInt("id"));
+                produto.setNome(resultset.getString("nome"));
+                produto.setValor(resultset.getInt("valor"));
+                produto.setStatus(resultset.getString("status"));
+
+                vendidos.add(produto);
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao listar produtos vendidos: " + e.getMessage());
+        } finally {
+            try {
+                if (resultset != null) resultset.close();
+                if (prep != null) prep.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                JOptionPane.showMessageDialog(null, "Erro ao fechar conexão: " + e.getMessage());
+            }
+        }
+        return vendidos;
+    }
     
 }
